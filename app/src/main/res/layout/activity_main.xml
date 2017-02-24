@@ -5,15 +5,15 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.administrator.myapplication.MainActivity">
-    <com.example.administrator.myapplication.view.MyView
+    <com.example.administrator.myapplication.view.MySurfaceView
         android:id="@+id/myView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
     <Button
-        android:id="@+id/btn_switch"
-        android:text="画线"
-        android:layout_alignParentRight="true"
+        android:id="@+id/btn_undo"
         android:layout_alignParentBottom="true"
+        android:layout_alignParentLeft="true"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="撤销"/>
 </RelativeLayout>

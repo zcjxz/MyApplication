@@ -5,35 +5,43 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-import com.example.administrator.myapplication.view.MyView;
+import com.example.administrator.myapplication.view.DrawView;
+import com.example.administrator.myapplication.view.MySurfaceView;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
     public final int MODE_POINT=0;
     public final int MODE_PATH=1;
-    private MyView myView;
-    private Button btnLine;
+    private MySurfaceView drawView;
+//    private Button btnLine;
     private int type=MODE_POINT;
+    private Button btnUndo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        myView = (MyView) findViewById(R.id.myView);
-        btnLine = (Button) findViewById(R.id.btn_switch);
-        btnLine.setOnClickListener(this);
+        drawView = (MySurfaceView) findViewById(R.id.myView);
+//        btnLine = (Button) findViewById(R.id.btn_switch);
+        btnUndo = (Button) findViewById(R.id.btn_undo);
+//        btnLine.setOnClickListener(this);
+        btnUndo.setOnClickListener(this);
     }
 
     @Override
     public void onClick(View v) {
         switch (v.getId()){
-            case R.id.btn_switch:
-                if (type==MODE_PATH){
-                    type=MODE_POINT;
-                }else if (type==MODE_POINT){
-                    type=MODE_PATH;
-                }
-                myView.setMode(type);
-                break;
+//            case R.id.btn_switch:
+//                if (type==MODE_PATH){
+//                    type=MODE_POINT;
+//                    btnLine.setText("画线");
+//                }else if (type==MODE_POINT){
+//                    type=MODE_PATH;
+//                    btnLine.setText("画点");
+//                }
+//                drawView.setMode(type);
+//                break;
+            case R.id.btn_undo:
+                drawView.undo();
         }
     }
 }
