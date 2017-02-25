@@ -45,6 +45,11 @@ public class DrawView extends View implements DrawViewInterface{
         postInvalidate();
     }
 
+    @Override
+    public void advance() {
+
+    }
+
     public DrawView(Context context) {
         super(context);
         init();

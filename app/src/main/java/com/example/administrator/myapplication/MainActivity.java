@@ -15,6 +15,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //    private Button btnLine;
     private int type=MODE_POINT;
     private Button btnUndo;
+    private Button btnAdvance;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +26,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnUndo = (Button) findViewById(R.id.btn_undo);
 //        btnLine.setOnClickListener(this);
         btnUndo.setOnClickListener(this);
+        btnAdvance = (Button) findViewById(R.id.btn_advance);
+        btnAdvance.setOnClickListener(this);
     }
 
     @Override
@@ -42,6 +45,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 //                break;
             case R.id.btn_undo:
                 drawView.undo();
+                break;
+            case R.id.btn_advance:
+                drawView.advance();
         }
     }
 }

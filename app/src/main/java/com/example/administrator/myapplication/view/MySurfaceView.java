@@ -5,7 +5,9 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.os.SystemClock;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -15,6 +17,7 @@ import com.example.administrator.myapplication.bean.DrawBean;
 
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Vector;
 
 
 public class MySurfaceView extends SurfaceView implements SurfaceHolder.Callback,Runnable,DrawViewInterface{
@@ -29,6 +32,8 @@ public class MySurfaceView extends SurfaceView implements SurfaceHolder.Callback
     private boolean isRunning;
     //路径的集合
     private ArrayList<DrawBean> drawList;
+    //用来撤销和恢复的集合
+    private ArrayList<DrawBean> undoList;
     //当前的路径
     private Path mPath;
     //当前的画笔
@@ -51,9 +56,11 @@ public class MySurfaceView extends SurfaceView implements SurfaceHolder.Callback
     }
 
     private void init(){
+        debug("init");
         paintColor=R.color.colorAccent;
         paintWith=10;
         drawList=new ArrayList<>();
+        undoList=new ArrayList<>();
         holder = getHolder();
         holder.addCallback(this);
         // 设置常亮
@@ -77,6 +84,7 @@ public class MySurfaceView extends SurfaceView implements SurfaceHolder.Callback
                 break;
             case MotionEvent.ACTION_MOVE:
                 mPath.lineTo(x,y);
+//                draw();
                 break;
             case MotionEvent.ACTION_UP:
                 saveDraw(mPaint,mPath);
@@ -91,6 +99,7 @@ public class MySurfaceView extends SurfaceView implements SurfaceHolder.Callback
     public void surfaceCreated(SurfaceHolder holder) {
         isRunning=true;
         mThread=new Thread(this);
+        mThread.start();
     }
 
     @Override
@@ -111,18 +120,29 @@ public class MySurfaceView extends SurfaceView implements SurfaceHolder.Callback
     }
 
     private void draw(){
-        Canvas canvas = holder.lockCanvas();
-        canvas.drawColor(Color.WHITE);
-        if (mPaint!=null&&mPath!=null) {
-            canvas.drawPath(mPath, mPaint);
-        }
-        Iterator<DrawBean> iterator = drawList.iterator();
-        while (iterator.hasNext()){
-            DrawBean drawBean = iterator.next();
-            canvas.drawPath(drawBean.getmPath(),drawBean.getmPaint());
-        }
-        holder.unlockCanvasAndPost(canvas);
+        Canvas canvas=null;
+        //捕获异常，防止程序退出时，holder为nul，或者canvas为null
+        try {
+            canvas = holder.lockCanvas();
+            canvas.drawColor(Color.WHITE);
+            if (mPaint != null && mPath != null) {
+                canvas.drawPath(mPath, mPaint);
+            }
+            //为了线程安全，加锁
+            synchronized (drawList) {
+                Iterator<DrawBean> iterator = drawList.iterator();
+                while (iterator.hasNext()) {
+                    DrawBean drawBean = iterator.next();
+                    canvas.drawPath(drawBean.getmPath(), drawBean.getmPaint());
+                }
+            }
+        }catch (Exception e){
 
+        }finally {
+            if (canvas!=null) {
+                holder.unlockCanvasAndPost(canvas);
+            }
+        }
     }
 
     private Paint getPaint(){
@@ -135,17 +155,44 @@ public class MySurfaceView extends SurfaceView implements SurfaceHolder.Callback
 
     @Override
     public void undo() {
+        synchronized (drawList){
+            if (drawList.size()<=0){
+                return;
+            }
+            DrawBean drawBean = drawList.get(drawList.size() - 1);
+            undoList.add(drawBean);
+            drawList.remove(drawBean);
+        }
+    }
 
+    @Override
+    public void advance() {
+        synchronized (drawList){
+            if (undoList.size()<=0){
+                return;
+            }
+            DrawBean drawBean = undoList.get(undoList.size() - 1);
+            drawList.add(drawBean);
+            undoList.remove(drawBean);
+        }
     }
 
     /**
      * 保存路径和画笔
      */
     private void saveDraw(Paint paint,Path path){
-        drawList.add(new DrawBean(paint,path));
+        //为了线程安全，加锁
+        synchronized (drawList) {
+            drawList.add(new DrawBean(paint, path));
+            undoList.clear();
+        }
     }
 
     private int getColor(int id){
         return getResources().getColor(id);
+    }
+
+    private void debug(String log){
+        Log.i("zcj",log);
     }
 }
